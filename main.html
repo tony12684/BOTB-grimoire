@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grimoire</title>
+  </head>
+  <body>
+    <!--
+    Things to include
+        visual elements
+            circular buttons
+                can be untargetable
+                selectable
+                    on select, change appearance
+            submit button for targets
+        text elements
+    TODO:
+        make circles selectable
+        add submit button
+        add text header
+    -->
+    <style>
+        :root {
+            --item-size: 10vmin;
+            --item-border-radius: 50%;
+        }
+        body {
+            display: flex;
+            width: 100vw;
+            justify-content: center;
+            align-items: center;
+            max-width: 1080px;
+            max-height: 1920px;
+            margin: 0 auto;
+            overflow: hidden;
+            background-color: gray;
+        }
+        text {
+            font-size: 1.5vmin;
+            font-family: Arial, sans-serif;
+            align-self: center;
+        }
+        .radial-container {
+            /* grid layout */
+            display: flex;             
+            justify-content: center;
+            align-items: center;
+            height: 100vmin;
+            width: 100vmin;
+            /* flex layout */
+            /*height: 100vh;             
+            /*margin: 0;*/
+            /*position: relative;*/
+            /*width: 100vw;*/
+            /*height: 100vh;*/
+        }
+        .circle {
+            display: flex;
+            position: absolute;
+            /* without absolute positioning the circles willnot overlap */
+            width: var(--item-size);
+            height: var(--item-size);
+            background-color: black;
+            border-radius: var(--item-border-radius);
+            border-color: black;
+            border-style: solid;
+            border-width: 0.25vmin;
+            align-items: center;
+            justify-content: center;
+            /*first paste*/
+            /*height: 100px;            /* Set equal height and width */
+            /*width: 100px;             /* to create a square initially */
+            /*background-color: red;  /* Add a background color to fill the circle */
+            /*border-radius: 50%;       /* Transform the square into a circle */
+        }
+    </style>
+    <div class="radial-container"></div>
+    <!-- <div class="circle2"></div> -->
+    <script>
+        function Circle() {
+            let div = document.createElement("div");
+            div.className = "circle";
+            let text = document.createElement("text");
+            text.innerText = "test";
+            div.appendChild(text);
+            return div;
+        }
+
+        function positionCircles() {
+            try {
+                // load all circles
+                const radius = 35;
+                const players = 21;
+                let radial = document.getElementsByClassName("radial-container")[0];
+                // calling .children is failing
+                // calling .childNodes fails too
+                // calling any methods fail?
+                for (let i = 0; i < players; i++) {
+                    radial.appendChild(new Circle())
+                }
+                // count them
+                let circles = radial.children;
+                let count = circles.length;
+                // set the angle increment
+                let angleIncrement = 360 / count;
+                // for each circle, transform by angle * index
+                for (let i = 0; i < count; i++) {
+                    let angle = (angleIncrement * i) - 90;
+                    if (angle < 0) {
+                        angle += 360;
+                    }
+                    circles[i].style.transform = `rotate(${angle}deg) translate(${radius}vmin) rotate(-${angle}deg)`;
+                    circles[i].children[0].style.color = "white";
+                }
+            } catch (e) {
+                alert("error: " + e);
+            }
+        }
+        window.onload = positionCircles;
+    </script>
+  </body>
+</html>
