@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <title>Grimoire</title>
   </head>
   <body>
@@ -13,21 +14,18 @@
                 big border
                 selectable
                     on select, change border color
-                can be untargetable
+                can be unselectable
             submit button for targets
     TODO:
         sub radial for reminders
             calculate position based on main circle
         show all reminders tab
         make circles selectable
+        
         add submit button
         add text header
     -->
     <style>
-        :root {
-            --item-border-radius: 50%;
-            --circle-border-width: 0.25vmin;
-        }
         body {
             display: flex;
             height: 100vh; /*need height and width for centering*/
@@ -52,34 +50,21 @@
             align-items: center;
             height: 100vmin;
             width: 100vmin;
-            /* flex layout */
-            /*height: 100vh;             
-            /*margin: 0;*/
-            /*position: relative;*/
-            /*width: 100vw;*/
-            /*height: 100vh;*/
         }
         .circle {
             display: flex;
             position: absolute;
             /* without absolute positioning the circles will not overlap on spawn */
-            /*width: var(--circle-max-size);
-            height: var(--circle-max-size);*/
             background-color: black;
             background-color: #d9af37;
-            border-radius: var(--item-border-radius);
+            border-radius: 50%;
             align-items: center;
             justify-content: center;
         }
         .circle text {
-            font-family: 'Courier New', Courier, monospace;
+             font-family: 'JetBrains Mono', monospace;
             position: absolute;
             color: white;
-            text-shadow: /*for text outline*/
-                -0.1vmin -0.1vmin 0 black,  
-                 0.1vmin -0.1vmin 0 black,
-                -0.1vmin  0.1vmin 0 black,
-                 0.1vmin  0.1vmin 0 black;
         }
         .circle img {
             position: absolute;
@@ -88,13 +73,9 @@
     <div class="radial-container"></div>
     <script>
         class Circle {
-            constructor(radial, theta, diameter) {
-                console.log(`Creating circle at radial: ${radial}, theta: ${theta}, diameter: ${diameter}`);
-                //const fontMinChars = 4;
-                //const fontMaxChars = 12;
-                //const fontMaxSize = 3; // for min char names
-                //const fontMinSize = 1.4; // for max char names
-                const name = "rich";
+            constructor(radial, theta, diameter, textSize = 3, name = "Player") {
+                console.log(`Creating circle at radial: ${radial}, theta: ${theta}, diameter: ${diameter}, name: ${name}`);
+                //TODO: place sub elements in divs so that they can be modified without changing overlap
                 // create circle div
                 let div = document.createElement("div");
                 div.className = "circle";
@@ -114,33 +95,60 @@
 
                 // add role or block image
                 // TODO: show these selectively
+                // for testing, show all of them overlapping to make sure they resize properly
                 image = document.createElement("img");
-                image.src = './images/blocks/White_Wool.png';
+                // count images in the roles folder
+                /*
+                    const roles = [
+                        'baron.png',
+                        'butler.png',
+                        'chef.png',
+                        'empath.png',
+                        'fortuneteller.png',
+                        'imp.png',
+                        'investigator.png',
+                        'librarian.png',
+                        'mayor.png',
+                        'monk.png',
+                        'poisoner.png',
+                        'ravenkeeper.png',
+                        'recluse.png',
+                        'saint.png',
+                        'scarletwoman.png',
+                        'slayer.png',
+                        'soldier.png',
+                        'spy.png',
+                        'undertaker.png',
+                        'virgin.png',
+                        'washerwoman.png'
+                    ]
+                    // for each image in the roles folder, add it to the circle
+                    //for (let i = 0; i < roles.length; i++) {
+                    //    console.log(`Adding role image: ${roles[i]}`);
+                    //    image = document.createElement("img");
+                    //    image.src = `./images/roles/${roles[i]}`;
+                    //    image.style.width = "115%";
+                    //    image.style.opacity = 0.5;
+                    //    div.appendChild(image);
+                    //}
+                */
                 image.src = './images/roles/imp.png';
-                image.style.width = "120%";
+                // 115% seems to work well
+                image.style.width = "115%";
                 div.appendChild(image);
 
                 // add half transparent shadow for text visibility
                 let shadow = document.createElement("div");
                 shadow.style.position = "absolute";
                 shadow.style.width = "100%";
-                shadow.style.height = "25%";
-                shadow.style.backgroundColor = "rgba(0, 0, 0, .4)";
+                shadow.style.height = "16%";
+                shadow.style.backgroundColor = "rgba(0, 0, 0, .66)";
                 div.appendChild(shadow);
 
                 // add name text
                 let text = document.createElement("text");
                 text.innerText = name;
-                //get length of text and adjust font size accordingly
-                //use fontmax at 4 characters, fontmin at 12 characters, and scale linearly in between
-                //let fontSize = fontMaxSize;
-                //if (text.innerText.length > fontMaxChars) {
-                //    fontSize = fontMinSize;
-                //} else if (text.innerText.length > fontMinChars) {
-                //    fontSize = fontMaxSize - ((text.innerText.length - fontMinChars) * (fontMaxSize - fontMinSize) / (fontMaxChars - fontMinChars));
-                //}
-                //text.style.fontSize = fontSize + "vmin";
-                    text.style.fontSize = "1.5vmin";
+                text.style.fontSize = textSize + "vmin";
                 div.appendChild(text);
                 console.log(`Created circle at radial: ${div.radial}, theta: ${div.theta}, diameter: ${div.diameter}`);
                 return div;
@@ -176,33 +184,68 @@
             return distance <= sumOfRadii;
         }
 
+        function resizeCircles(circles) {
+            let overlap = false;
+            do {
+                overlap = checkCircleOverlapPolar(
+                    circles[0].radial,
+                    circles[0].theta,
+                    circles[0].diameter/2,
+                    circles[1].radial,
+                    circles[1].theta,
+                    circles[1].diameter/2);
+                console.log("overlap: " + overlap);
+                if (overlap) {
+                    console.log("repositioning circles");
+                    // reposition circles
+                    for (let i = 0; i < circles.length; i++) {
+                        circles[i].style.width = (circles[i].diameter - 0.1) + "vmin";
+                        circles[i].style.height = (circles[i].diameter - 0.1) + "vmin";
+                        circles[i].diameter -= 0.1;
+                    }
+                }
+            } while (overlap);
+        }
+
+        function resizeTexts(circles) {
+            for (let i = 0; i < circles.length; i++) {
+                let text = circles[i].getElementsByTagName("text")[0];
+                let textSize = parseFloat(text.style.fontSize);
+                let textLength = text.innerText.length;
+                // the 0.6 is an empirically derived constant that seems to work well for fitting text within circles
+                while ((textSize * textLength * 0.6) > circles[i].diameter) {
+                    textSize -= 0.1;
+                    text.style.fontSize = textSize + "vmin";
+                }
+            }
+        }
+
         function positionCircles() {
             try {
                 // load all circles
                 const radius = 35;
-                const players = 21;
+                const players = 10;
                 const maxCircleSize = 15; // in vmin
                 let radial = document.getElementsByClassName("radial-container")[0];
                 
+                // set the angle increment
                 let angleIncrement = 360 / players;
+
+                // create circles
                 for (let i = 0; i < players; i++) {
-                    //console.log(`Creating circle ${i+1} of ${players}`);
                     let angle = (angleIncrement * i) // get angle in degrees
-                    //console.log(`   Angle for circle ${i+1}: ${angle} degrees`);
                     angle = angle * (Math.PI / 180); // convert to radians
-                    //console.log(`   Angle for circle ${i+1}: ${angle} radians`);
                     angle = (2*Math.PI)-angle; // invert angle for correct direction
-                    //console.log(`   Adjusted angle for circle ${i+1}: ${angle} radians`);
                     //angle is now the radian position of the circle,
-                    //  using polar coordinates, but with 0 at the top
-                    radial.appendChild(new Circle(radius, angle, maxCircleSize))
+                    //  using polar coordinates, but with 0 at THE TOP
+                    let name = `Player${(i+1)*10000}`; // placeholder name test
+                    radial.appendChild(new Circle(radius, angle, maxCircleSize, 3, name));
                 }
 
                 // count them
                 //  use count just in case we want to modify the player count later
                 let circles = radial.children;
                 let count = circles.length;
-                // set the angle increment
                 // for each circle, transform by angle * index
                 for (let i = 0; i < count; i++) {
                     let angle = (angleIncrement * i) - 90;
@@ -211,26 +254,9 @@
                     }
                     circles[i].style.transform = `rotate(${angle}deg) translate(${radius}vmin) rotate(-${angle}deg)`;
                 }
-                let overlap = false;
-                do {
-                    overlap = checkCircleOverlapPolar(
-                        circles[0].radial,
-                        circles[0].theta,
-                        circles[0].diameter/2,
-                        circles[1].radial,
-                        circles[1].theta,
-                        circles[1].diameter/2);
-                    console.log("overlap: " + overlap);
-                    if (overlap) {
-                        console.log("repositioning circles");
-                        // reposition circles
-                        for (let i = 0; i < count; i++) {
-                            circles[i].style.width = (circles[i].diameter - 0.1) + "vmin";
-                            circles[i].style.height = (circles[i].diameter - 0.1) + "vmin";
-                            circles[i].diameter -= 0.1;
-                        }
-                    }
-                } while (overlap);
+                resizeCircles(circles);
+                resizeTexts(circles);
+
             } catch (e) {
                 alert("error: " + e);
             }
