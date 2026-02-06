@@ -14,7 +14,6 @@
                 selectable
                     on select, change appearance
             submit button for targets
-        text elements
     TODO:
         make circles selectable
         add submit button
@@ -22,11 +21,12 @@
     -->
     <style>
         :root {
-            --item-size: 10vmin;
+            --circle-size: 10vmin;
             --item-border-radius: 50%;
         }
         body {
             display: flex;
+            height: 100vh; /*need height and width for centering*/
             width: 100vw;
             justify-content: center;
             align-items: center;
@@ -59,9 +59,9 @@
             display: flex;
             position: absolute;
             /* without absolute positioning the circles willnot overlap */
-            width: var(--item-size);
-            height: var(--item-size);
-            background-color: black;
+            width: var(--circle-size);
+            height: var(--circle-size);
+            background-color: white;
             border-radius: var(--item-border-radius);
             border-color: black;
             border-style: solid;
@@ -74,6 +74,19 @@
             /*background-color: red;  /* Add a background color to fill the circle */
             /*border-radius: 50%;       /* Transform the square into a circle */
         }
+        .circle text {
+            font-size: 2vmin;
+            position: absolute;
+            color: white;
+            text-shadow: 
+                -0.1vmin -0.1vmin 0 black,  
+                 0.1vmin -0.1vmin 0 black,
+                -0.1vmin  0.1vmin 0 black,
+                 0.1vmin  0.1vmin 0 black;
+        }
+        .circle img {
+            position: absolute;
+        }
     </style>
     <div class="radial-container"></div>
     <!-- <div class="circle2"></div> -->
@@ -81,6 +94,10 @@
         function Circle() {
             let div = document.createElement("div");
             div.className = "circle";
+            let image = document.createElement("img");
+            image.src = './images/roles/Icon_washerwoman.png';
+            image.style.width = "100%";
+            div.appendChild(image);
             let text = document.createElement("text");
             text.innerText = "test";
             div.appendChild(text);
