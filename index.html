@@ -21,7 +21,7 @@
             calculate position based on main circle
         show all reminders tab
         make circles selectable
-        
+
         add submit button
         add text header
     -->
@@ -55,8 +55,8 @@
             display: flex;
             position: absolute;
             /* without absolute positioning the circles will not overlap on spawn */
-            background-color: black;
-            background-color: #d9af37;
+            background-color: black; /* for non selectable? */
+            background-color: #d9af37; /* for selected? */
             border-radius: 50%;
             align-items: center;
             justify-content: center;
@@ -98,6 +98,7 @@
                 // for testing, show all of them overlapping to make sure they resize properly
                 image = document.createElement("img");
                 // count images in the roles folder
+                let hide = {
                 /*
                     const roles = [
                         'baron.png',
@@ -132,6 +133,7 @@
                     //    div.appendChild(image);
                     //}
                 */
+                }
                 image.src = './images/roles/imp.png';
                 // 115% seems to work well
                 image.style.width = "115%";
@@ -154,33 +156,24 @@
                 return div;
             }
         }
-        /**
-         * Checks if two circles overlap using their polar coordinates and radii.
-         * 
-         * @param {number} r1 Radial coordinate of circle 1 center.
-         * @param {number} theta1 Angular coordinate of circle 1 center (in radians).
-         * @param {number} R1 Radius of circle 1.
-         * @param {number} r2 Radial coordinate of circle 2 center.
-         * @param {number} theta2 Angular coordinate of circle 2 center (in radians).
-         * @param {number} R2 Radius of circle 2.
-         * @returns {boolean} True if the circles overlap, false otherwise.
-         */
+
+
         function checkCircleOverlapPolar(r1, theta1, R1, r2, theta2, R2) {
             console.log(`Checking overlap: Circle 1 (r=${r1}, theta=${theta1}, R=${R1}), Circle 2 (r=${r2}, theta=${theta2}, R=${R2})`);
-            // 1. Convert polar coordinates to Cartesian coordinates
+            // Convert polar coordinates to Cartesian coordinates
             const x1 = r1 * Math.cos(theta1);
             const y1 = r1 * Math.sin(theta1);
             const x2 = r2 * Math.cos(theta2);
             const y2 = r2 * Math.sin(theta2);
 
-            // 2. Calculate the distance between the centers
+            // Calculate the distance between the centers
             const dx = x2 - x1;
             const dy = y2 - y1;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            // 3. Check for overlap
+            // Check for overlap
             // If the distance is less than or equal to the sum of the radii, they overlap.
-            const sumOfRadii = R1 + R2;
+            const sumOfRadii = R1 + R2 + 0.15; // add a small buffer to prevent visual overlap
             return distance <= sumOfRadii;
         }
 
@@ -224,8 +217,8 @@
             try {
                 // load all circles
                 const radius = 35;
-                const players = 10;
-                const maxCircleSize = 15; // in vmin
+                const players = 14;
+                const maxCircleSize = 16; // in vmin
                 let radial = document.getElementsByClassName("radial-container")[0];
                 
                 // set the angle increment
