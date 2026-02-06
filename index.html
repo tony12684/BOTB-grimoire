@@ -10,19 +10,23 @@
     Things to include
         visual elements
             circular buttons
-                can be untargetable
+                big border
                 selectable
-                    on select, change appearance
+                    on select, change border color
+                can be untargetable
             submit button for targets
     TODO:
+        sub radial for reminders
+            calculate position based on main circle
+        show all reminders tab
         make circles selectable
         add submit button
         add text header
     -->
     <style>
         :root {
-            --circle-size: 10vmin;
             --item-border-radius: 50%;
+            --circle-border-width: 0.25vmin;
         }
         body {
             display: flex;
@@ -34,7 +38,7 @@
             max-height: 1920px;
             margin: 0 auto;
             overflow: hidden;
-            background-color: gray;
+            background-color: #200e2f;
         }
         text {
             font-size: 1.5vmin;
@@ -58,27 +62,20 @@
         .circle {
             display: flex;
             position: absolute;
-            /* without absolute positioning the circles willnot overlap */
-            width: var(--circle-size);
-            height: var(--circle-size);
-            background-color: white;
+            /* without absolute positioning the circles will not overlap on spawn */
+            /*width: var(--circle-max-size);
+            height: var(--circle-max-size);*/
+            background-color: black;
+            background-color: #d9af37;
             border-radius: var(--item-border-radius);
-            border-color: black;
-            border-style: solid;
-            border-width: 0.25vmin;
             align-items: center;
             justify-content: center;
-            /*first paste*/
-            /*height: 100px;            /* Set equal height and width */
-            /*width: 100px;             /* to create a square initially */
-            /*background-color: red;  /* Add a background color to fill the circle */
-            /*border-radius: 50%;       /* Transform the square into a circle */
         }
         .circle text {
-            font-size: 2vmin;
+            font-family: 'Courier New', Courier, monospace;
             position: absolute;
             color: white;
-            text-shadow: 
+            text-shadow: /*for text outline*/
                 -0.1vmin -0.1vmin 0 black,  
                  0.1vmin -0.1vmin 0 black,
                 -0.1vmin  0.1vmin 0 black,
@@ -89,19 +86,94 @@
         }
     </style>
     <div class="radial-container"></div>
-    <!-- <div class="circle2"></div> -->
     <script>
-        function Circle() {
-            let div = document.createElement("div");
-            div.className = "circle";
-            let image = document.createElement("img");
-            image.src = './images/roles/Icon_washerwoman.png';
-            image.style.width = "100%";
-            div.appendChild(image);
-            let text = document.createElement("text");
-            text.innerText = "test";
-            div.appendChild(text);
-            return div;
+        class Circle {
+            constructor(radial, theta, diameter) {
+                console.log(`Creating circle at radial: ${radial}, theta: ${theta}, diameter: ${diameter}`);
+                //const fontMinChars = 4;
+                //const fontMaxChars = 12;
+                //const fontMaxSize = 3; // for min char names
+                //const fontMinSize = 1.4; // for max char names
+                const name = "rich";
+                // create circle div
+                let div = document.createElement("div");
+                div.className = "circle";
+                div.style.width = diameter + "vmin";
+                div.style.height = diameter + "vmin";
+                
+                // Store properties on the div element so we can access them later
+                div.radial = radial;
+                div.theta = theta;
+                div.diameter = diameter;
+
+                // add background image
+                let image = document.createElement("img");
+                image.src = './images/textures/paper-circle.png';
+                image.style.width = "85%";
+                div.appendChild(image);
+
+                // add role or block image
+                // TODO: show these selectively
+                image = document.createElement("img");
+                image.src = './images/blocks/White_Wool.png';
+                image.src = './images/roles/imp.png';
+                image.style.width = "120%";
+                div.appendChild(image);
+
+                // add half transparent shadow for text visibility
+                let shadow = document.createElement("div");
+                shadow.style.position = "absolute";
+                shadow.style.width = "100%";
+                shadow.style.height = "25%";
+                shadow.style.backgroundColor = "rgba(0, 0, 0, .4)";
+                div.appendChild(shadow);
+
+                // add name text
+                let text = document.createElement("text");
+                text.innerText = name;
+                //get length of text and adjust font size accordingly
+                //use fontmax at 4 characters, fontmin at 12 characters, and scale linearly in between
+                //let fontSize = fontMaxSize;
+                //if (text.innerText.length > fontMaxChars) {
+                //    fontSize = fontMinSize;
+                //} else if (text.innerText.length > fontMinChars) {
+                //    fontSize = fontMaxSize - ((text.innerText.length - fontMinChars) * (fontMaxSize - fontMinSize) / (fontMaxChars - fontMinChars));
+                //}
+                //text.style.fontSize = fontSize + "vmin";
+                    text.style.fontSize = "1.5vmin";
+                div.appendChild(text);
+                console.log(`Created circle at radial: ${div.radial}, theta: ${div.theta}, diameter: ${div.diameter}`);
+                return div;
+            }
+        }
+        /**
+         * Checks if two circles overlap using their polar coordinates and radii.
+         * 
+         * @param {number} r1 Radial coordinate of circle 1 center.
+         * @param {number} theta1 Angular coordinate of circle 1 center (in radians).
+         * @param {number} R1 Radius of circle 1.
+         * @param {number} r2 Radial coordinate of circle 2 center.
+         * @param {number} theta2 Angular coordinate of circle 2 center (in radians).
+         * @param {number} R2 Radius of circle 2.
+         * @returns {boolean} True if the circles overlap, false otherwise.
+         */
+        function checkCircleOverlapPolar(r1, theta1, R1, r2, theta2, R2) {
+            console.log(`Checking overlap: Circle 1 (r=${r1}, theta=${theta1}, R=${R1}), Circle 2 (r=${r2}, theta=${theta2}, R=${R2})`);
+            // 1. Convert polar coordinates to Cartesian coordinates
+            const x1 = r1 * Math.cos(theta1);
+            const y1 = r1 * Math.sin(theta1);
+            const x2 = r2 * Math.cos(theta2);
+            const y2 = r2 * Math.sin(theta2);
+
+            // 2. Calculate the distance between the centers
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // 3. Check for overlap
+            // If the distance is less than or equal to the sum of the radii, they overlap.
+            const sumOfRadii = R1 + R2;
+            return distance <= sumOfRadii;
         }
 
         function positionCircles() {
@@ -109,18 +181,28 @@
                 // load all circles
                 const radius = 35;
                 const players = 21;
+                const maxCircleSize = 15; // in vmin
                 let radial = document.getElementsByClassName("radial-container")[0];
-                // calling .children is failing
-                // calling .childNodes fails too
-                // calling any methods fail?
+                
+                let angleIncrement = 360 / players;
                 for (let i = 0; i < players; i++) {
-                    radial.appendChild(new Circle())
+                    //console.log(`Creating circle ${i+1} of ${players}`);
+                    let angle = (angleIncrement * i) // get angle in degrees
+                    //console.log(`   Angle for circle ${i+1}: ${angle} degrees`);
+                    angle = angle * (Math.PI / 180); // convert to radians
+                    //console.log(`   Angle for circle ${i+1}: ${angle} radians`);
+                    angle = (2*Math.PI)-angle; // invert angle for correct direction
+                    //console.log(`   Adjusted angle for circle ${i+1}: ${angle} radians`);
+                    //angle is now the radian position of the circle,
+                    //  using polar coordinates, but with 0 at the top
+                    radial.appendChild(new Circle(radius, angle, maxCircleSize))
                 }
+
                 // count them
+                //  use count just in case we want to modify the player count later
                 let circles = radial.children;
                 let count = circles.length;
                 // set the angle increment
-                let angleIncrement = 360 / count;
                 // for each circle, transform by angle * index
                 for (let i = 0; i < count; i++) {
                     let angle = (angleIncrement * i) - 90;
@@ -128,8 +210,27 @@
                         angle += 360;
                     }
                     circles[i].style.transform = `rotate(${angle}deg) translate(${radius}vmin) rotate(-${angle}deg)`;
-                    circles[i].children[0].style.color = "white";
                 }
+                let overlap = false;
+                do {
+                    overlap = checkCircleOverlapPolar(
+                        circles[0].radial,
+                        circles[0].theta,
+                        circles[0].diameter/2,
+                        circles[1].radial,
+                        circles[1].theta,
+                        circles[1].diameter/2);
+                    console.log("overlap: " + overlap);
+                    if (overlap) {
+                        console.log("repositioning circles");
+                        // reposition circles
+                        for (let i = 0; i < count; i++) {
+                            circles[i].style.width = (circles[i].diameter - 0.1) + "vmin";
+                            circles[i].style.height = (circles[i].diameter - 0.1) + "vmin";
+                            circles[i].diameter -= 0.1;
+                        }
+                    }
+                } while (overlap);
             } catch (e) {
                 alert("error: " + e);
             }
