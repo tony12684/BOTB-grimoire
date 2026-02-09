@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--Jetbrains monospaced font-->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <title>Grimoire</title>
   </head>
@@ -32,20 +33,38 @@
             width: 100vw;
             justify-content: center;
             align-items: center;
-            max-width: 1080px;
-            max-height: 1920px;
             margin: 0 auto;
             overflow: hidden;
             background-color: #200e2f;
+            user-select: none;
         }
-        text {
-            font-size: 1.5vmin;
-            font-family: Arial, sans-serif;
-            align-self: center;
+        .action-prompt-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, calc(-50% - 3vmin)); /* 25vmin above center */
+            font-family: 'JetBrains Mono', monospace;
+            color: white;
+            font-size: 4vmin;
+            width: 40vmin;
+            text-align: center;
+        }
+        .submit-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, calc(-50% + 20vmin)); /* 25vmin below center */
+            font-family: 'JetBrains Mono', monospace;
+            color: white;
+            font-size: 4vmin;
+            border: 2px solid white;
+            padding: 1vmin 3vmin;
+            border-radius: 5vmin;
+            cursor: pointer;
         }
         .radial-container {
             /* grid layout */
-            display: flex;             
+            display: flex;
             justify-content: center;
             align-items: center;
             height: 100vmin;
@@ -60,6 +79,8 @@
             border-radius: 50%;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
+             /* for testing, add a border to see the circle boundaries */
         }
         .circle text {
              font-family: 'JetBrains Mono', monospace;
@@ -70,7 +91,11 @@
             position: absolute;
         }
     </style>
+
     <div class="radial-container"></div>
+    <div class="action-prompt-text">Donec molestie ornare pharetra. Maecenas posuere sit amet neque non luctus. Maecenas malesuada tristique tortor sit amet porttitor. Sed bibendum mauris libero, eu egestas erat tincidunt sed. Vestibulum tempus lacinia nulla tempor porttitor.</div>
+    <div class="submit-button">Submit</div>
+
     <script>
         class Circle {
             constructor(radial, theta, diameter, textSize = 3, name = "Player") {
@@ -213,11 +238,43 @@
             }
         }
 
+        function doDivsOverlap(div1, div2) {
+            const rect1 = div1.getBoundingClientRect();
+            const rect2 = div2.getBoundingClientRect();
+
+            return !(
+                rect1.top > rect2.bottom ||
+                rect1.bottom < rect2.top ||
+                rect1.left > rect2.right ||
+                rect1.right < rect2.left
+            );
+        }
+
+        function resizePrompt(prompt, submit) {
+            console.log("resizing prompt");
+            // Calculate vmin in pixels: 1vmin = 1% of smaller viewport dimension
+            const vminInPixels = Math.min(window.innerWidth, window.innerHeight) / 100;
+            // Get the computed font size in pixels and convert to vmin
+            let fontSizeInPixels = parseFloat(window.getComputedStyle(prompt).fontSize);
+            let fontSize = fontSizeInPixels / vminInPixels;
+            // Add a safety counter to prevent infinite loops
+            let maxIterations = 100;
+            let iterations = 0;
+            // check for overlap
+            while (doDivsOverlap(prompt, submit) && iterations < maxIterations) {
+                fontSize -= 0.1;
+                prompt.style.fontSize = fontSize + "vmin";
+                iterations++;
+            }
+            console.log(`Resized prompt in ${iterations} iterations`);
+            console.log("Final prompt font size: " + prompt.style.fontSize);
+        }
+
         function positionCircles() {
             try {
                 // load all circles
-                const radius = 35;
-                const players = 14;
+                const radius = 35; // in vmin
+                const players = 16;
                 const maxCircleSize = 16; // in vmin
                 let radial = document.getElementsByClassName("radial-container")[0];
                 
@@ -249,6 +306,9 @@
                 }
                 resizeCircles(circles);
                 resizeTexts(circles);
+                let prompt = document.getElementsByClassName("action-prompt-text")[0];
+                let submit = document.getElementsByClassName("submit-button")[0];
+                resizePrompt(prompt, submit);
 
             } catch (e) {
                 alert("error: " + e);
