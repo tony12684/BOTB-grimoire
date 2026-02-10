@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!--Jetbrains monospaced font-->
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <title>Grimoire</title>
   </head>
   <body>
@@ -21,110 +24,152 @@
         sub radial for reminders
             calculate position based on main circle
         show all reminders tab
+        hide all elements until sizes are calculated to prevent 1 frame flashes of unstyled content
         make circles selectable
-
-        add submit button
-        add text header
+        add submit button functionality
+        get the tab to flash and alert the user
+        prevent click and drag when background color is yellow??????
     -->
     <style>
-        body {
-            display: flex;
-            height: 100vh; /*need height and width for centering*/
-            width: 100vw;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto;
-            overflow: hidden;
-            background-color: #200e2f;
-            user-select: none;
-        }
-        .action-prompt-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, calc(-50% - 3vmin)); /* 25vmin above center */
-            font-family: 'JetBrains Mono', monospace;
-            color: white;
-            font-size: 4vmin;
-            width: 40vmin;
-            text-align: center;
-        }
-        .submit-button {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, calc(-50% + 20vmin)); /* 25vmin below center */
-            font-family: 'JetBrains Mono', monospace;
-            color: white;
-            font-size: 4vmin;
-            border: 2px solid white;
-            padding: 1vmin 3vmin;
-            border-radius: 5vmin;
-            cursor: pointer;
-        }
-        .radial-container {
-            /* grid layout */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vmin;
-            width: 100vmin;
-        }
-        .circle {
-            display: flex;
-            position: absolute;
-            /* without absolute positioning the circles will not overlap on spawn */
-            background-color: black; /* for non selectable? */
-            background-color: #d9af37; /* for selected? */
-            border-radius: 50%;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-             /* for testing, add a border to see the circle boundaries */
-        }
-        .circle text {
-             font-family: 'JetBrains Mono', monospace;
-            position: absolute;
-            color: white;
-        }
-        .circle img {
-            position: absolute;
-        }
+      :root {
+        --nonselectable-color: black;
+        --unselected-color: #a668bb;
+        --selected-color: #d9af37;
+      }
+      body {
+        display: flex;
+        height: 100vh; /*need height and width for centering*/
+        width: 100vw;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto;
+        overflow: hidden;
+        background-color: #200e2f;
+        user-select: none;
+      }
+      .action-prompt-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(
+          -50%,
+          calc(-50% - 3vmin)
+        ); /* 25vmin above center */
+        font-family: "JetBrains Mono", monospace;
+        color: white;
+        font-size: 3vmin;
+        width: 40vmin;
+        text-align: center;
+        visibility: hidden; /* hide until resized to prevent flashes of unstyled content */
+      }
+      .submit-button {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(
+          -50%,
+          calc(-50% + 20vmin)
+        ); /* 25vmin below center */
+        font-family: "JetBrains Mono", monospace;
+        color: white;
+        font-size: 3vmin;
+        border: 2px solid white;
+        padding: 1vmin 3vmin;
+        border-radius: 5vmin;
+        cursor: pointer;
+      }
+      .radial-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vmin;
+        width: 100vmin;
+      }
+      .radial-container * {
+        position: absolute;
+      }
+      .circle {
+        display: flex;
+        position: absolute;
+        /* without absolute positioning the circles will not overlap on spawn */
+        background-color: var(--unselected-color); /* for unselected */
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        cursor: pointer;
+        /* for testing, add a border to see the circle boundaries */
+      }
+      .text-shadow {
+        display: flex; /* required for centering? */
+        justify-content: center; /* Centers horizontally */
+        align-items: center; /* Centers vertically */
+        border-radius: 0.6vmin;
+        width: 102%;
+        height: 0.1vmin;
+        background-color: rgb(0, 0, 0, 0.66);
+        line-height: 1; /* sets borders of text elements to be tight */
+      }
+      .text-shadow text {
+        font-family: "JetBrains Mono", monospace;
+        color: white;
+      }
     </style>
 
     <div class="radial-container"></div>
-    <div class="action-prompt-text">Donec molestie ornare pharetra. Maecenas posuere sit amet neque non luctus. Maecenas malesuada tristique tortor sit amet porttitor. Sed bibendum mauris libero, eu egestas erat tincidunt sed. Vestibulum tempus lacinia nulla tempor porttitor.</div>
-    <div class="submit-button">Submit</div>
+    <div class="action-prompt-text">
+      Donec molestie ornare pharetra. Maecenas posuere sit amet neque non
+      luctus. Maecenas malesuada tristique tortor sit amet porttitor. Sed
+      bibendum mauris libero, eu egestas erat tincidunt sed. Vestibulum tempus
+      lacinia nulla tempor porttitor.
+    </div>
+    <div class="submit-button" onclick="submitChoices()">Submit</div>
 
     <script>
-        class Circle {
-            constructor(radial, theta, diameter, textSize = 3, name = "Player") {
-                console.log(`Creating circle at radial: ${radial}, theta: ${theta}, diameter: ${diameter}, name: ${name}`);
-                //TODO: place sub elements in divs so that they can be modified without changing overlap
-                // create circle div
-                let div = document.createElement("div");
-                div.className = "circle";
-                div.style.width = diameter + "vmin";
-                div.style.height = diameter + "vmin";
-                
-                // Store properties on the div element so we can access them later
-                div.radial = radial;
-                div.theta = theta;
-                div.diameter = diameter;
+      class Circle {
+        constructor(
+          id,
+          radial,
+          theta,
+          diameter,
+          textSize = 3,
+          name = "Player",
+          selectState = "1",
+        ) {
+          console.log(
+            `Creating circle at radial: ${radial}, theta: ${theta}, diameter: ${diameter}, name: ${name}`,
+          );
+          //TODO: place sub elements in divs so that they can be modified without changing overlap
+          // create circle div
+          let div = document.createElement("div");
+          div.className = "circle";
+          div.style.width = diameter + "vmin";
+          div.style.height = diameter + "vmin";
 
-                // add background image
-                let image = document.createElement("img");
-                image.src = './images/textures/paper-circle.png';
-                image.style.width = "85%";
-                div.appendChild(image);
+          // Store properties on the div element so we can access them later
+          div.id = id;
+          div.radial = radial;
+          div.theta = theta;
+          div.diameter = diameter;
+          div.selectState = selectState; // unselected state default
+          // use selectState 2 for selected and state 0 for unselectable
 
-                // add role or block image
-                // TODO: show these selectively
-                // for testing, show all of them overlapping to make sure they resize properly
-                image = document.createElement("img");
-                // count images in the roles folder
-                let hide = {
-                /*
+          // Set on click method
+          div.addEventListener("click", toggleSelection);
+
+          // add background image
+          let image = document.createElement("img");
+          image.src = "./images/textures/paper-circle.png";
+          image.style.width = "85%";
+          div.appendChild(image);
+
+          // add role or block image
+          // TODO: show these selectively
+          // for testing, show all of them overlapping to make sure they resize properly
+          image = document.createElement("img");
+          // count images in the roles folder
+          let hide = {
+            /*
                     const roles = [
                         'baron.png',
                         'butler.png',
@@ -158,163 +203,265 @@
                     //    div.appendChild(image);
                     //}
                 */
-                }
-                image.src = './images/roles/imp.png';
-                // 115% seems to work well
-                image.style.width = "115%";
-                div.appendChild(image);
+          };
+          image.src = "./images/roles/imp.png";
+          // 115% seems to work well
+          image.style.width = "115%";
+          div.appendChild(image);
 
-                // add half transparent shadow for text visibility
-                let shadow = document.createElement("div");
-                shadow.style.position = "absolute";
-                shadow.style.width = "100%";
-                shadow.style.height = "16%";
-                shadow.style.backgroundColor = "rgba(0, 0, 0, .66)";
-                div.appendChild(shadow);
+          // add half transparent shadow for text visibility
+          let shadow = document.createElement("div");
+          shadow.classList.add("text-shadow");
+          shadow.style.position = "absolute";
+          shadow.style.height = "0.1vmin";
+          shadow.style.backgroundColor = "rgba(0, 0, 0, .66)";
+          div.appendChild(shadow);
 
-                // add name text
-                let text = document.createElement("text");
-                text.innerText = name;
-                text.style.fontSize = textSize + "vmin";
-                div.appendChild(text);
-                console.log(`Created circle at radial: ${div.radial}, theta: ${div.theta}, diameter: ${div.diameter}`);
-                return div;
-            }
+          // add name text
+          let text = document.createElement("text");
+          text.innerText = name;
+          text.style.fontSize = textSize + "vmin";
+          shadow.appendChild(text);
+          console.log(
+            `Created circle at radial: ${div.radial}, theta: ${div.theta}, diameter: ${div.diameter}`,
+          );
+          return div;
         }
+      }
 
-
-        function checkCircleOverlapPolar(r1, theta1, R1, r2, theta2, R2) {
-            console.log(`Checking overlap: Circle 1 (r=${r1}, theta=${theta1}, R=${R1}), Circle 2 (r=${r2}, theta=${theta2}, R=${R2})`);
-            // Convert polar coordinates to Cartesian coordinates
-            const x1 = r1 * Math.cos(theta1);
-            const y1 = r1 * Math.sin(theta1);
-            const x2 = r2 * Math.cos(theta2);
-            const y2 = r2 * Math.sin(theta2);
-
-            // Calculate the distance between the centers
-            const dx = x2 - x1;
-            const dy = y2 - y1;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            // Check for overlap
-            // If the distance is less than or equal to the sum of the radii, they overlap.
-            const sumOfRadii = R1 + R2 + 0.15; // add a small buffer to prevent visual overlap
-            return distance <= sumOfRadii;
+      function getParentCircle(element) {
+        if (element.className === "circle") {
+          return element;
+        } else if (element.tagName === "BODY" || element.tagName === null) {
+          throw new Error(
+            "'circle' class not found in element structure in getParentCircle()",
+          );
+        } else {
+          return getParentCircle(element.parentElement);
         }
+      }
 
-        function resizeCircles(circles) {
-            let overlap = false;
-            do {
-                overlap = checkCircleOverlapPolar(
-                    circles[0].radial,
-                    circles[0].theta,
-                    circles[0].diameter/2,
-                    circles[1].radial,
-                    circles[1].theta,
-                    circles[1].diameter/2);
-                console.log("overlap: " + overlap);
-                if (overlap) {
-                    console.log("repositioning circles");
-                    // reposition circles
-                    for (let i = 0; i < circles.length; i++) {
-                        circles[i].style.width = (circles[i].diameter - 0.1) + "vmin";
-                        circles[i].style.height = (circles[i].diameter - 0.1) + "vmin";
-                        circles[i].diameter -= 0.1;
-                    }
-                }
-            } while (overlap);
+      function toggleSelection(event) {
+        try {
+          console.log("You clicked: ", event.target);
+          circleDiv = getParentCircle(event.target);
+          console.log("circle div: ", circleDiv);
+          console.log("circleDiv.selectState: ", circleDiv.selectState);
+          if (circleDiv.selectState == 1) {
+            circleDiv.selectState = 2;
+            circleDiv.style.backgroundColor = "var(--selected-color)";
+          } else if (circleDiv.selectState == 2) {
+            circleDiv.selectState = 1;
+            circleDiv.style.backgroundColor = "var(--unselected-color)";
+          }
+        } catch (e) {
+          alert("error: " + e);
         }
+      }
 
-        function resizeTexts(circles) {
+      function checkCircleOverlapPolar(r1, theta1, R1, r2, theta2, R2) {
+        //console.log(`Checking overlap: Circle 1 (r=${r1}, theta=${theta1}, R=${R1}), Circle 2 (r=${r2}, theta=${theta2}, R=${R2})`);
+        // Convert polar coordinates to Cartesian coordinates
+        const x1 = r1 * Math.cos(theta1);
+        const y1 = r1 * Math.sin(theta1);
+        const x2 = r2 * Math.cos(theta2);
+        const y2 = r2 * Math.sin(theta2);
+
+        // Calculate the distance between the centers
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Check for overlap
+        // If the distance is less than or equal to the sum of the radii, they overlap.
+        const sumOfRadii = R1 + R2 + 0.15; // add a small buffer to prevent visual overlap
+        return distance <= sumOfRadii;
+      }
+
+      function resizeCircles(circles) {
+        let overlap = false;
+        console.log("resizing circles...");
+        do {
+          overlap = checkCircleOverlapPolar(
+            circles[0].radial,
+            circles[0].theta,
+            circles[0].diameter / 2,
+            circles[1].radial,
+            circles[1].theta,
+            circles[1].diameter / 2,
+          );
+          //console.log("overlap: " + overlap);
+          if (overlap) {
+            //console.log("repositioning circles");
+            // reposition circles
             for (let i = 0; i < circles.length; i++) {
-                let text = circles[i].getElementsByTagName("text")[0];
-                let textSize = parseFloat(text.style.fontSize);
-                let textLength = text.innerText.length;
-                // the 0.6 is an empirically derived constant that seems to work well for fitting text within circles
-                while ((textSize * textLength * 0.6) > circles[i].diameter) {
-                    textSize -= 0.1;
-                    text.style.fontSize = textSize + "vmin";
-                }
+              circles[i].style.width = circles[i].diameter - 0.1 + "vmin";
+              circles[i].style.height = circles[i].diameter - 0.1 + "vmin";
+              circles[i].diameter -= 0.1;
             }
+          }
+        } while (overlap);
+        console.log("circles resized successfully");
+      }
+
+      function resizeTexts(circles) {
+        for (let i = 0; i < circles.length; i++) {
+          let text = circles[i].getElementsByTagName("text")[0];
+          let textSize = parseFloat(text.style.fontSize);
+          let textLength = text.innerText.length;
+          // the 0.6 is an empirically derived constant that seems to work well for fitting text within circles
+          while (textSize * textLength * 0.6 > circles[i].diameter) {
+            textSize -= 0.1;
+            text.style.fontSize = textSize + "vmin";
+          }
         }
+      }
 
-        function doDivsOverlap(div1, div2) {
-            const rect1 = div1.getBoundingClientRect();
-            const rect2 = div2.getBoundingClientRect();
+      function isElementContainedVerticaly(element1, element2) {
+        // returns true if element1 is vertically contained in element2
+        // assume they are both centered vertically
+        const rect1 = element1.getBoundingClientRect();
+        const rect2 = element2.getBoundingClientRect();
 
-            return !(
-                rect1.top > rect2.bottom ||
-                rect1.bottom < rect2.top ||
-                rect1.left > rect2.right ||
-                rect1.right < rect2.left
+        return rect1.height < rect2.height;
+      }
+
+      function resizeTextShadow(circles) {
+        //for each circle make the text contained
+        console.log("resizing text shadow");
+        Array.from(circles).forEach((circle) => {
+          let contained = false;
+          do {
+            let text = circle.getElementsByTagName("text")[0];
+            let shadow = circle.querySelectorAll(".text-shadow")[0];
+            contained = isElementContainedVerticaly(text, shadow);
+            if (!contained) {
+              //increase shadow
+              console.log("shadow height: ", shadow.style.height);
+              console.log(
+                "text rect height: ",
+                text.getBoundingClientRect().height,
+              );
+              console.log(
+                "shadow rect height: ",
+                shadow.getBoundingClientRect().height,
+              );
+              shadow.style.height =
+                parseFloat(shadow.style.height) + 0.1 + "vmin";
+              console.log(shadow.style.height);
+            }
+          } while (!contained);
+        });
+      }
+
+      function doDivsOverlap(div1, div2) {
+        const rect1 = div1.getBoundingClientRect();
+        const rect2 = div2.getBoundingClientRect();
+
+        return !(
+          rect1.top > rect2.bottom ||
+          rect1.bottom < rect2.top ||
+          rect1.left > rect2.right ||
+          rect1.right < rect2.left
+        );
+      }
+
+      function resizePrompt(prompt, submit) {
+        console.log("resizing prompt...");
+        // Calculate vmin in pixels: 1vmin = 1% of smaller viewport dimension
+        const vminInPixels =
+          Math.min(window.innerWidth, window.innerHeight) / 100;
+        // Get the computed font size in pixels and convert to vmin
+        let fontSizeInPixels = parseFloat(
+          window.getComputedStyle(prompt).fontSize,
+        );
+        let fontSize = fontSizeInPixels / vminInPixels;
+        // Add a safety counter to prevent infinite loops
+        let maxIterations = 100;
+        let iterations = 0;
+        // check for overlap
+        while (doDivsOverlap(prompt, submit) && iterations < maxIterations) {
+          fontSize -= 0.1;
+          prompt.style.fontSize = fontSize + "vmin";
+          iterations++;
+        }
+        // show the prompt after resizing to prevent flashes of unstyled content
+        prompt.style.visibility = "visible";
+        console.log(`Resized prompt in ${iterations} iterations`);
+        console.log("Final prompt font size: " + prompt.style.fontSize);
+      }
+
+      function submitChoices() {
+        //get all children of the radial container element with the circle class
+        let radial = document.getElementsByClassName("radial-container")[0];
+        let circles = radial.querySelectorAll(".circle");
+
+        // for each toggled circle, append their id to the msg
+        let msg = "";
+        circles.forEach((circle) => {
+          if (circle.selectState == 2) {
+            console.log("Adding to msg, circle.id: ", circle.id);
+            msg += String(circle.id) + ",";
+          }
+        });
+
+        // if we added any items, remove the trailing ',' delimiter
+        if (msg.length > 0) {
+          msg = msg.slice(0, -1);
+        }
+        console.log("msg: ", msg);
+
+        alert("Submitted circles: " + msg);
+      }
+
+      function positionCircles() {
+        try {
+          // load all circles
+          const radius = 35; // in vmin
+          const players = 16;
+          const maxCircleSize = 16; // in vmin
+          let radial = document.getElementsByClassName("radial-container")[0];
+
+          // set the angle increment
+          let angleIncrement = 360 / players;
+
+          // create circles
+          for (let i = 0; i < players; i++) {
+            let angle = angleIncrement * i; // get angle in degrees
+            angle = angle * (Math.PI / 180); // convert to radians
+            angle = 2 * Math.PI - angle; // invert angle for correct direction
+            //angle is now the radian position of the circle,
+            //  using polar coordinates, but with 0 at THE TOP
+            let name = `Tom`; // placeholder name test
+            radial.appendChild(
+              new Circle(i, radius, angle, maxCircleSize, 3, name),
             );
-        }
+          }
 
-        function resizePrompt(prompt, submit) {
-            console.log("resizing prompt");
-            // Calculate vmin in pixels: 1vmin = 1% of smaller viewport dimension
-            const vminInPixels = Math.min(window.innerWidth, window.innerHeight) / 100;
-            // Get the computed font size in pixels and convert to vmin
-            let fontSizeInPixels = parseFloat(window.getComputedStyle(prompt).fontSize);
-            let fontSize = fontSizeInPixels / vminInPixels;
-            // Add a safety counter to prevent infinite loops
-            let maxIterations = 100;
-            let iterations = 0;
-            // check for overlap
-            while (doDivsOverlap(prompt, submit) && iterations < maxIterations) {
-                fontSize -= 0.1;
-                prompt.style.fontSize = fontSize + "vmin";
-                iterations++;
+          // count them
+          //  use count just in case we want to modify the player count later
+          let circles = radial.children;
+          let count = circles.length;
+          // for each circle, transform by angle * index
+          for (let i = 0; i < count; i++) {
+            let angle = angleIncrement * i - 90;
+            if (angle < 0) {
+              angle += 360;
             }
-            console.log(`Resized prompt in ${iterations} iterations`);
-            console.log("Final prompt font size: " + prompt.style.fontSize);
+            circles[i].style.transform =
+              `rotate(${angle}deg) translate(${radius}vmin) rotate(-${angle}deg)`;
+          }
+          resizeCircles(circles);
+          resizeTexts(circles);
+          resizeTextShadow(circles);
+          let prompt = document.getElementsByClassName("action-prompt-text")[0];
+          let submit = document.getElementsByClassName("submit-button")[0];
+          resizePrompt(prompt, submit);
+        } catch (e) {
+          alert("error: " + e);
         }
-
-        function positionCircles() {
-            try {
-                // load all circles
-                const radius = 35; // in vmin
-                const players = 16;
-                const maxCircleSize = 16; // in vmin
-                let radial = document.getElementsByClassName("radial-container")[0];
-                
-                // set the angle increment
-                let angleIncrement = 360 / players;
-
-                // create circles
-                for (let i = 0; i < players; i++) {
-                    let angle = (angleIncrement * i) // get angle in degrees
-                    angle = angle * (Math.PI / 180); // convert to radians
-                    angle = (2*Math.PI)-angle; // invert angle for correct direction
-                    //angle is now the radian position of the circle,
-                    //  using polar coordinates, but with 0 at THE TOP
-                    let name = `Player${(i+1)*10000}`; // placeholder name test
-                    radial.appendChild(new Circle(radius, angle, maxCircleSize, 3, name));
-                }
-
-                // count them
-                //  use count just in case we want to modify the player count later
-                let circles = radial.children;
-                let count = circles.length;
-                // for each circle, transform by angle * index
-                for (let i = 0; i < count; i++) {
-                    let angle = (angleIncrement * i) - 90;
-                    if (angle < 0) {
-                        angle += 360;
-                    }
-                    circles[i].style.transform = `rotate(${angle}deg) translate(${radius}vmin) rotate(-${angle}deg)`;
-                }
-                resizeCircles(circles);
-                resizeTexts(circles);
-                let prompt = document.getElementsByClassName("action-prompt-text")[0];
-                let submit = document.getElementsByClassName("submit-button")[0];
-                resizePrompt(prompt, submit);
-
-            } catch (e) {
-                alert("error: " + e);
-            }
-        }
-        window.onload = positionCircles;
+      }
+      window.onload = positionCircles;
     </script>
   </body>
 </html>
