@@ -14,12 +14,13 @@
     <!--
     Things to include
         visual elements
-            circular buttons
-                big border
-                selectable
-                    on select, change border color
-                can be unselectable
-            submit button for targets
+          corner buttons for other options and tabs
+            settings button
+            active reminders button
+            action history button
+            quick functions button
+              start night
+              end night
     TODO:
         sub radial for reminders
             calculate position based on main circle
@@ -28,7 +29,6 @@
         make circles selectable
         add submit button functionality
         get the tab to flash and alert the user
-        prevent click and drag when background color is yellow??????
     -->
     <style>
       :root {
@@ -36,16 +36,22 @@
         --unselected-color: #a668bb;
         --selected-color: #d9af37;
       }
+
+      * {
+        /* prevent click and drag */
+        -webkit-user-drag: none;
+        /* prevent text selection */
+        user-select: none;
+        margin: 0 auto;
+      }
       body {
         display: flex;
         height: 100vh; /*need height and width for centering*/
         width: 100vw;
         justify-content: center;
         align-items: center;
-        margin: 0 auto;
         overflow: hidden;
         background-color: #200e2f;
-        user-select: none;
       }
       .action-prompt-text {
         position: absolute;
@@ -114,6 +120,18 @@
         font-family: "JetBrains Mono", monospace;
         color: white;
       }
+      .subCircle {
+        display: flex;
+        position: absolute;
+        background-color: #331433;
+        border-radius: 50%;
+        border-width: 2px;
+        border-style: solid;
+        border-color: black;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
     </style>
 
     <div class="radial-container"></div>
@@ -136,10 +154,9 @@
           name = "Player",
           selectState = "1",
         ) {
-          console.log(
-            `Creating circle at radial: ${radial}, theta: ${theta}, diameter: ${diameter}, name: ${name}`,
-          );
-          //TODO: place sub elements in divs so that they can be modified without changing overlap
+          // console.log(
+          //   `Creating circle at radial: ${radial}, theta: ${theta}, diameter: ${diameter}, name: ${name}`,
+          // );
           // create circle div
           let div = document.createElement("div");
           div.className = "circle";
@@ -223,7 +240,8 @@
           text.style.fontSize = textSize + "vmin";
           shadow.appendChild(text);
           console.log(
-            `Created circle at radial: ${div.radial}, theta: ${div.theta}, diameter: ${div.diameter}`,
+            'Created circle'
+            //`Created circle at radial: ${div.radial}, theta: ${div.theta}, diameter: ${div.diameter}`,
           );
           return div;
         }
@@ -242,6 +260,7 @@
       }
 
       function toggleSelection(event) {
+        console.log("Toggling selection...");
         try {
           console.log("You clicked: ", event.target);
           circleDiv = getParentCircle(event.target);
@@ -254,12 +273,14 @@
             circleDiv.selectState = 1;
             circleDiv.style.backgroundColor = "var(--unselected-color)";
           }
+          console.log("Selection toggled successfully");
         } catch (e) {
           alert("error: " + e);
         }
       }
 
       function checkCircleOverlapPolar(r1, theta1, R1, r2, theta2, R2) {
+        console.log("Checking circle overlap...");
         //console.log(`Checking overlap: Circle 1 (r=${r1}, theta=${theta1}, R=${R1}), Circle 2 (r=${r2}, theta=${theta2}, R=${R2})`);
         // Convert polar coordinates to Cartesian coordinates
         const x1 = r1 * Math.cos(theta1);
@@ -305,6 +326,7 @@
       }
 
       function resizeTexts(circles) {
+        console.log("resizing texts...");
         for (let i = 0; i < circles.length; i++) {
           let text = circles[i].getElementsByTagName("text")[0];
           let textSize = parseFloat(text.style.fontSize);
@@ -315,6 +337,7 @@
             text.style.fontSize = textSize + "vmin";
           }
         }
+        console.log("texts resized successfully");
       }
 
       function isElementContainedVerticaly(element1, element2) {
@@ -328,33 +351,43 @@
 
       function resizeTextShadow(circles) {
         //for each circle make the text contained
-        console.log("resizing text shadow");
-        Array.from(circles).forEach((circle) => {
-          let contained = false;
-          do {
-            let text = circle.getElementsByTagName("text")[0];
-            let shadow = circle.querySelectorAll(".text-shadow")[0];
-            contained = isElementContainedVerticaly(text, shadow);
-            if (!contained) {
-              //increase shadow
-              console.log("shadow height: ", shadow.style.height);
-              console.log(
-                "text rect height: ",
-                text.getBoundingClientRect().height,
-              );
-              console.log(
-                "shadow rect height: ",
-                shadow.getBoundingClientRect().height,
-              );
-              shadow.style.height =
-                parseFloat(shadow.style.height) + 0.1 + "vmin";
-              console.log(shadow.style.height);
-            }
-          } while (!contained);
-        });
+        console.log("resizing text shadow...");
+        console.log('circles: ', circles);
+        try {
+          Array.from(circles).forEach((circle) => {
+            let contained = false;
+            do {
+              // TODO: switch this to a query selector for text
+              let text = circle.querySelectorAll("text")[0];
+              let shadow = circle.querySelectorAll(".text-shadow")[0];
+              //console.log("text: ", text);
+              //console.log("shadow: ", shadow);
+              contained = isElementContainedVerticaly(text, shadow);
+              if (!contained) {
+                //increase shadow
+                // console.log("shadow height: ", shadow.style.height);
+                // console.log(
+                //   "text rect height: ",
+                //   text.getBoundingClientRect().height,
+                // );
+                // console.log(
+                //   "shadow rect height: ",
+                //   shadow.getBoundingClientRect().height,
+                // );
+                shadow.style.height =
+                  parseFloat(shadow.style.height) + 0.1 + "vmin";
+                // console.log(shadow.style.height);
+              }
+            } while (!contained);
+          });
+          console.log("text shadows resized successfully");
+        } catch (e) {
+          alert("error in resizeTextShadow: " + e);
+        }
       }
 
       function doDivsOverlap(div1, div2) {
+        console.log("Checking overlap between div1 and div2");
         const rect1 = div1.getBoundingClientRect();
         const rect2 = div2.getBoundingClientRect();
 
@@ -414,12 +447,10 @@
         alert("Submitted circles: " + msg);
       }
 
-      function positionCircles() {
+      function makeCircles(radius, players, maxCircleSize) {
+        console.log("Making circles...");
         try {
           // load all circles
-          const radius = 35; // in vmin
-          const players = 16;
-          const maxCircleSize = 16; // in vmin
           let radial = document.getElementsByClassName("radial-container")[0];
 
           // set the angle increment
@@ -432,7 +463,7 @@
             angle = 2 * Math.PI - angle; // invert angle for correct direction
             //angle is now the radian position of the circle,
             //  using polar coordinates, but with 0 at THE TOP
-            let name = `Tom`; // placeholder name test
+            let name = `Player`; // placeholder name test
             radial.appendChild(
               new Circle(i, radius, angle, maxCircleSize, 3, name),
             );
@@ -440,7 +471,8 @@
 
           // count them
           //  use count just in case we want to modify the player count later
-          let circles = radial.children;
+          let circles = radial.querySelectorAll(".circle");
+          console.log("circles: ", circles);
           let count = circles.length;
           // for each circle, transform by angle * index
           for (let i = 0; i < count; i++) {
@@ -451,17 +483,97 @@
             circles[i].style.transform =
               `rotate(${angle}deg) translate(${radius}vmin) rotate(-${angle}deg)`;
           }
+          console.log("Circles made successfully");
+          return circles;
+        }catch (e) {
+          alert("error in makeCircles: " + e);
+        }
+      }
+
+      function makeCornerButtons(maxCircleSize) {
+        console.log("Making corner buttons...");
+        let buttonSize = maxCircleSize * 0.8;
+        let buttonDistance = 50 - (buttonSize / 2 + 1);
+        try {
+          let corners = [
+            { name: "Settings", position: 0 },
+            { name: "Quick Actions", position: 1 },
+            { name: "Reminders", position: 2 },
+            { name: "History", position: 3 },
+          ];
+          let radial = document.getElementsByClassName("radial-container")[0];
+          corners.forEach((corner) => {
+            let button = document.createElement("div");
+            button.className = "subCircle";
+            button.style.width = buttonSize + "vmin";
+            button.style.height = buttonSize + "vmin";
+            let angle = 90 * corner.position;
+            button.style.transform = 
+              `rotate(${angle}deg) translate(${buttonDistance}vmin) rotate(-90deg) translate(${buttonDistance}vmin) rotate(90deg) rotate(-${angle}deg)`;
+            let text = document.createElement("text");
+            text.innerText = corner.name;
+            text.style.fontSize = buttonSize / 5 + "vmin";
+            text.style.color = "white";
+            text.style.textAlign = "center";
+            text.style.lineHeight = 1.2;
+            button.appendChild(text);
+            radial.appendChild(button);
+
+          });
+          console.log("Corner buttons made successfully");
+        }catch (e) {
+          alert("error: " + e);
+        }
+      }
+
+      function loadPage() {
+        console.log("Loading page...");
+        try {
+          const radius = 35; // in vmin
+          const numPlayers = 8; // count
+          const maxCircleSize = 16; // in vmin
+          const circles = makeCircles(radius, numPlayers, maxCircleSize);
+          makeCornerButtons(maxCircleSize);
           resizeCircles(circles);
           resizeTexts(circles);
           resizeTextShadow(circles);
           let prompt = document.getElementsByClassName("action-prompt-text")[0];
           let submit = document.getElementsByClassName("submit-button")[0];
           resizePrompt(prompt, submit);
+          console.log("Page loaded successfully");
         } catch (e) {
-          alert("error: " + e);
+          alert("error in loadPage: " + e);
         }
       }
-      window.onload = positionCircles;
+
+      var originalTitle = document.title;
+      var intervalId; // Variable to store the interval ID
+      function startFlash() {
+        var newTitle = "❗❗❗❗❗"; // The new title to flash
+
+        const mySound = new Audio("./sounds/Bell_use1.ogg");
+
+        // Set an interval to toggle the title every 1000ms (1 second)
+        intervalId = setInterval(function() {
+          if (!document.hasFocus()) {
+            //mySound.play();
+            if (document.title === originalTitle) {
+              document.title = newTitle;
+            } else {
+              document.title = originalTitle;
+            }
+          }
+          //mySound.play();
+        }, 500); // Adjust the interval speed as needed
+      }
+
+      function stopFlash() {
+        clearInterval(intervalId); // Stop the interval
+        document.title = originalTitle; // Restore the original title
+      }
+      startFlash(); // Call this function to start flashing the title
+      
+      window.onload = loadPage;
     </script>
   </body>
 </html>
