@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        display: flex;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+      }
+
+      div#leftPanel {
+        height: 100%;
+        width: 20%;
+        left: 0;
+        background: red;
+      }
+
+      div#main {
+        flex: 2;
+        display: flex;
+        align-items: center; /* vertical centering */
+        justify-content: center; /* horizontal centering */
+        height: 100%;
+        margin: 0;
+        background: yellow;
+      }
+
+      .wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 100vmin;
+        background: green;
+      }
+
+      .one-by-one.aspect-ratio {
+        padding-bottom: 100%;
+      }
+
+      .wrapper > .content {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 20%;
+      }
+
+      .circle {
+        position: relative;
+        height: 100%;
+        border: dashed 1px;
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="leftPanel"></div>
+    <div id="main">
+      <div class="wrapper">
+        <div class="one-by-one aspect-ratio"></div>
+        <div class="content">
+          <div class="circle"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

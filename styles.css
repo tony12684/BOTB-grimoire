@@ -1,0 +1,102 @@
+:root {
+  --nonselectable-color: black;
+  --unselected-color: #a668bb;
+  --selected-color: #d9af37;
+  --font-family: "JetBrains Mono", monospace;
+}
+
+* {
+  /* prevent click and drag */
+  -webkit-user-drag: none;
+  /* prevent text selection */
+  user-select: none;
+  margin: 0 auto;
+  font-family: var(--font-family);
+  color: white;
+}
+body {
+  display: flex;
+  height: 100vh; /*need height and width for centering*/
+  width: 100vw;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background-color: #200e2f;
+}
+nav {
+  width: 30%;
+  height: 100%;
+  font-style: italic;
+  background-color: lightgray;
+}
+aside {
+  width: 30%;
+  height: 100%;
+  font-style: italic;
+  background-color: lightgray;
+}
+.action-prompt-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% - 3vmin)); /* 25vmin above center */
+  font-size: 3vmin;
+  width: 40vmin;
+  text-align: center;
+  visibility: hidden; /* hide until resized to prevent flashes of unstyled content */
+}
+.submit-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% + 20vmin)); /* 25vmin below center */
+  font-size: 3vmin;
+  border: 2px solid white;
+  padding: 1vmin 3vmin;
+  border-radius: 5vmin;
+  cursor: pointer;
+}
+.radial-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vmin;
+  width: 100vmin;
+}
+.radial-container * {
+  position: absolute;
+}
+.circle {
+  display: flex;
+  position: absolute;
+  /* without absolute positioning the circles will not overlap on spawn */
+  background-color: var(--unselected-color); /* for unselected */
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  /* for testing, add a border to see the circle boundaries */
+}
+.text-shadow {
+  display: flex; /* required for centering? */
+  justify-content: center; /* Centers horizontally */
+  align-items: center; /* Centers vertically */
+  border-radius: 0.6vmin;
+  width: 102%;
+  height: 0.1vmin;
+  background-color: rgb(0, 0, 0, 0.66);
+  line-height: 1; /* sets borders of text elements to be tight */
+}
+.subCircle {
+  display: flex;
+  position: absolute;
+  background-color: #331433;
+  border-radius: 50%;
+  border-width: 2px;
+  border-style: solid;
+  border-color: black;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
