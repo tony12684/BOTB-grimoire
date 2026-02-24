@@ -31,6 +31,7 @@ class Circle {
     // add background image
     let image = document.createElement("img");
     image.src = "./images/textures/paper-circle.png";
+    image.alt = "Circle Background";
     image.style.width = "85%";
     div.appendChild(image);
 
@@ -76,6 +77,7 @@ class Circle {
         */
     };
     image.src = "./images/roles/imp.png";
+    image.alt = "Role Image Imp";
     // 115% seems to work well
     image.style.width = "115%";
     div.appendChild(image);
@@ -376,7 +378,7 @@ function loadPage() {
   console.log("Loading page...");
   try {
     const radius = 35; // in vmin
-    const numPlayers = 8; // count
+    const numPlayers = 21; // count
     const maxCircleSize = 16; // in vmin
     const circles = makeCircles(radius, numPlayers, maxCircleSize);
     makeCornerButtons(maxCircleSize);
