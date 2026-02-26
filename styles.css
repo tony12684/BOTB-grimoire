@@ -51,7 +51,7 @@ aside {
   left: 50%;
   transform: translate(-50%, calc(-50% + 20vmin)); /* 25vmin below center */
   font-size: 3vmin;
-  border: 2px solid white;
+  border: 0.1vmin solid white;
   padding: 1vmin 3vmin;
   border-radius: 5vmin;
   cursor: pointer;
@@ -93,7 +93,7 @@ aside {
   position: absolute;
   background-color: #331433;
   border-radius: 50%;
-  border-width: 2px;
+  border-width: 0.1vmin;
   border-style: solid;
   border-color: black;
   align-items: center;
